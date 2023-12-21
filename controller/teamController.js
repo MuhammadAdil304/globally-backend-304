@@ -38,7 +38,9 @@ const TeamController = {
   getTeams : async (req , res) => {
     try{
       console.log('ok')
-      const result = await Team.find()
+      let { pageNo, pageSize } = req.query
+      let skipPage = (pageNo - 1) * pageSize
+      const result = await Team.find().limit(pageSize).skip(skipPage)
       res.send(SendResponse(true , 'All teams' , result))
     }
     catch(error){
