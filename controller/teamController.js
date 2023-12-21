@@ -3,23 +3,21 @@ const Team = require('../models/teamModel');
 const AuthModel = require('../models/authModel');
 const { SendResponse } = require('../helpers/helpers');
 const TeamController = {
-   createTeam: async (req, res) => {
+  createTeam: async (req, res) => {
     try {
-      // Assuming that the request body contains team name and an array of user IDs
       const { name, members } = req.body;
 
-      // Create a new team
       const newTeam = await Team.create({
         name,
-        members: members || [], // If members array is not provided, default to an empty array
+        members: members || [],
       });
 
-      // Add the team ID to each user's list of teams
       if (members && members.length > 0) {
-        await AuthModel.updateMany(
-          { _id: { $in: members } },
-          { $push: { teams: newTeam._id } }
-        );
+        const users = await AuthModel.find({ _id: { $in: members } });
+        await Promise.all(users.map(async (user) => {
+          // Update each member's team array
+          await AuthModel.findByIdAndUpdate(user._id, { $push: { teams: newTeam._id } });
+        }));
       }
 
       res.status(201).json({
@@ -35,18 +33,54 @@ const TeamController = {
       });
     }
   },
-  getTeams : async (req , res) => {
-    try{
-      console.log('ok')
-      let { pageNo, pageSize } = req.query
-      let skipPage = (pageNo - 1) * pageSize
-      const result = await Team.find().limit(pageSize).skip(skipPage)
-      res.send(SendResponse(true , 'All teams' , result))
+  getTeamMembers: async (req, res) => {
+    try {
+      const  teamId  = req.params.id
+      // const obj = teamId
+      console.log(teamId)
+      const team = await Team.findById(teamId);
+      console.log(team)
+      if (!team) {
+        return res.status(404).json({
+          success: false,
+          message: 'Team not found',
+        });
+      }
+      else {
+        const memberDetails = await AuthModel.find({ _id: { $in: team.members } });
+        res.status(200).json({
+          success: true,
+          members: memberDetails,
+        });
+      }
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: 'Error fetching team members',
+        error: error.message,
+      });
     }
-    catch(error){
-      res.send(SendResponse(false , 'server error' , error))
+  },
+  getAllTeamsWithMembers: async (req, res) => {
+    try {
+      // Get all teams with members details
+      const teams = await Team.find().populate({
+        path: 'members',
+        select: 'firstName lastName email  userStatus createdAt updatedAt' // Include the fields you need
+      });
+
+      res.status(200).json({
+        success: true,
+        message: 'All teams with members fetched successfully',
+        teams,
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: 'Error fetching teams with members',
+        error: error.message,
+      });
     }
- 
   }
 };
 
