@@ -32,12 +32,12 @@ const CourseController = {
     
             // Check karein ke team aur member mojood hain
             const team = await Team.findById(teamId);
-            const user = await AuthModel.findById(assignedTo);
+            // const user = await AuthModel.findById(assignedTo);
     
-            if (!team || !user) {
+            if (!team) {
                 return res.status(404).json({
                     success: false,
-                    message: 'Team ya user nahi mila',
+                    message: 'Team  nahi mila',
                 });
             }
     
@@ -46,15 +46,12 @@ const CourseController = {
                 title,
                 description,
                 teamId,
-                assignedTo,
             });
     
             // Update team ke tasks array mein newTask ko push karein
             await Team.findByIdAndUpdate(team, { $push: { tasks: newTask } });
     
             // Update user ke tasks array mein newTask ko push karein
-            await AuthModel.findByIdAndUpdate(user, { $push: { tasks: newTask._id } });
-    
             return res.status(201).json({
                 success: true,
                 message: 'Task successfully assign kiya gaya hai',
