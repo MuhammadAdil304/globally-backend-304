@@ -14,7 +14,7 @@ const CourseScheema = mongoose.Schema({
         default: 'pending',
     },
     assignedTo: { type: mongoose.Schema.Types.ObjectId, ref: '/users' },
-    team: { type: mongoose.Schema.Types.ObjectId, ref: 'Team' },
+    teamId: { type: mongoose.Schema.Types.ObjectId, ref: 'Team' },
   
 },
     {

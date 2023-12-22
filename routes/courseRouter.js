@@ -5,7 +5,7 @@ const route = express.Router()
 
 route.get('/' ,   CourseController.get)
 route.get('/:id' , CourseController.getbyId)
-route.post('/' , CourseController.add)
+route.post('/assign' , CourseController.assignTask)
 route.delete('/:id' , CourseController.del)
 route.put('/:id' , CourseController.edit)
 route.put('/:id/taskCompleted' , CourseController.TaskCompleted)

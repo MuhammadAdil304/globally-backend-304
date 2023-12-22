@@ -92,7 +92,6 @@ const AuthController = {
         catch (error) {
             res.status(404).send(SendResponse(true, 'You are No Rights for this Action', error))
         }
-
     },
     AdminProtected: async (req, res, next) => {
         try {

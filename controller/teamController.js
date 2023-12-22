@@ -66,7 +66,9 @@ const TeamController = {
       // Get all teams with members details
       const teams = await Team.find().populate({
         path: 'members',
-        select: 'firstName lastName email  userStatus createdAt updatedAt' // Include the fields you need
+        select: 'firstName lastName email  userStatus createdAt updatedAt',
+        path:'tasks',
+        select:'title description taskStatus'
       });
 
       res.status(200).json({
