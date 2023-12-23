@@ -48,7 +48,7 @@ const AuthController = {
             const obj = { email, password }
             const userExist = await AuthModel.findOne({ email: obj.email })
             if (userExist) {
-                let correctPassword = await bcrypt.compare(obj.password, userExist.password)
+                const correctPassword = await bcrypt.compare(obj.password, userExist.password)
                 if (correctPassword) {
                     const token = jwt.sign({ ...userExist }, process.env.SECRET_KEY)
                     res.send(SendResponse(true, "Data Added Successfully", { user: userExist, token: token }))

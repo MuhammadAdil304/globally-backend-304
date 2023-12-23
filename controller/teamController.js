@@ -2,6 +2,7 @@
 const Team = require('../models/teamModel');
 const AuthModel = require('../models/authModel');
 const { SendResponse } = require('../helpers/helpers');
+
 const TeamController = {
   createTeam: async (req, res) => {
     try {
@@ -35,7 +36,7 @@ const TeamController = {
   },
   getTeamMembers: async (req, res) => {
     try {
-      const  teamId  = req.params.id
+      const teamId = req.params.id
       // const obj = teamId
       console.log(teamId)
       const team = await Team.findById(teamId);
@@ -64,12 +65,19 @@ const TeamController = {
   getAllTeamsWithMembers: async (req, res) => {
     try {
       // Get all teams with members details
-      const teams = await Team.find().populate({
-        path: 'members',
-        select: 'firstName lastName email  userStatus createdAt updatedAt',
-        path:'tasks',
-        select:'title description taskStatus'
-      });
+      const teams = await Team.find()
+        .populate({
+          path: 'members',
+          select: 'firstName lastName email userStatus createdAt updatedAt',
+        })
+        .populate({
+          path: 'tasks',
+          select: 'title description taskStatus',
+        })
+        .populate({
+          path: 'messages.sender',
+          select: 'firstName lastName email userStatus createdAt updatedAt',
+        });
 
       res.status(200).json({
         success: true,
@@ -83,7 +91,38 @@ const TeamController = {
         error: error.message,
       });
     }
-  }
+  },
+  // joinTeam: (io, socket, teamId) => {
+  //   io.to(teamId).emit('receiveMessage', { teamId: teamId, message: 'User joined team room' });
+  // },
+  sendMessage: async (io, data) => {
+    try {
+      const { teamId, senderId, content } = data;
+      const message = {
+        sender: senderId,
+        content: content,
+        createdAt: new Date()
+      };
+      const updatedTeam = await Team.findOneAndUpdate(
+        { _id: teamId },
+        { $push: { messages: message } },
+        { new: true }
+      )
+
+      io.to(teamId).emit('receiveMessage', { teamId: teamId, message: message });
+      return { success: true, message: 'Message sent', updatedTeam: updatedTeam };
+    } catch (error) {
+      console.error(error);
+      return { success: false, message: 'Error sending message' };
+    }
+  },
+  // disconnectUser: (io, socket) => {
+  //   console.log('User disconnected');
+  //   io.of('/').in(socket.id).clients((error, socketIds) => {
+  //     if (error) throw error;
+  //     socketIds.forEach((socketId) => io.sockets.sockets[socketId].leaveAll());
+  //   });
+  // },
 };
 
 module.exports = TeamController;
