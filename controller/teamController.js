@@ -36,22 +36,40 @@ const TeamController = {
   },
   getTeamMembers: async (req, res) => {
     try {
-      const teamId = req.params.id
-      // const obj = teamId
-      console.log(teamId)
-      const team = await Team.findById(teamId);
-      console.log(team)
+      const teamId = req.params.id;
+      console.log(teamId);
+      const team = await Team.findById(teamId).populate('members messages.sender');
+      console.log(team);
       if (!team) {
         return res.status(404).json({
           success: false,
           message: 'Team not found',
         });
-      }
-      else {
-        const memberDetails = await AuthModel.find({ _id: { $in: team.members } });
+      } else {
+        const members = team.members.map(member => ({
+          _id: member._id ,
+          // Add other member properties as needed
+        }));
+
+        const messages = team.messages.map(message => ({
+          content: message.content,
+          createdAt: message.createdAt,
+          sender: {
+            _id: message.sender._id,
+            firstName: message.sender.firstName,
+            lastName: message.sender.lastName
+            // Add other sender properties as needed
+          },
+        }));
+
         res.status(200).json({
           success: true,
-          members: memberDetails,
+          team: {
+            name: team.name,
+            members,
+            tasks: team.tasks, // Include other team properties as needed
+            messages,
+          },
         });
       }
     } catch (error) {
@@ -62,6 +80,7 @@ const TeamController = {
       });
     }
   },
+
   getAllTeamsWithMembers: async (req, res) => {
     try {
       // Get all teams with members details

@@ -22,6 +22,9 @@ const AuthScheema = mongoose.Schema({
         enum: ['teamMembers' , 'users'],
         default:'users'
     },
+
+    
+
     
   
 

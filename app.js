@@ -7,6 +7,7 @@ const socketIo = require('socket.io');
 const http = require('http');
 const route = require('./routes/authRoute');
 const router = require('./routes/teamRoute');
+const info = require('./utils/sendMail');
 const App = express();
 const server = http.createServer(App);
 const io = socketIo(server);

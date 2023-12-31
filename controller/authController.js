@@ -6,8 +6,8 @@ const AuthModel = require("../models/authModel")
 const AuthController = {
     signUp: async (req, res) => {
         try {
-            const { email, password, firstName, lastName } = req.body
-            const obj = { email, password, firstName, lastName,  }
+            const { email, password, firstName, lastName,} = req.body
+            const obj = { email, password, firstName, lastName, }
             const errArr = []
             if (!obj.email) {
                 errArr.push("Username is required")
@@ -53,7 +53,7 @@ const AuthController = {
                     const token = jwt.sign({ ...userExist }, process.env.SECRET_KEY)
                     res.send(SendResponse(true, "Data Added Successfully", { user: userExist, token: token }))
                 }
-                else{
+                else {
                     res.send(SendResponse(false, "Your Password is incorrect", { user: userExist, token: token }))
                 }
             }
@@ -111,16 +111,16 @@ const AuthController = {
             res.send(SendResponse(false, 'Server Error', error))
         }
     },
-    UserStatus : async (req, res) => {
+    UserStatus: async (req, res) => {
         try {
             const TaskId = req.params.id
             console.log(TaskId)
             const UserJoined = await AuthModel.findByIdAndUpdate(TaskId, { userSelected: 'teamMembers' }, { new: true })
             if (!UserJoined) {
-                res.json({message :'users', })
+                res.json({ message: 'users', })
             }
-            return  res.json(UserJoined)
-            
+            return res.json(UserJoined)
+
         }
         catch (error) {
             res.send(SendResponse(false, 'Internal Server Error', error))
